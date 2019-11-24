@@ -1,5 +1,213 @@
 ﻿@page "/"
+@using CarRental.Data
+@using CarRental.Business.Classes
+@using CarRental.Common.Classes
+@using CarRental.Common.Extensions
+@using CarRental.Common.Interfaces
+@using CarRental.Common.Enums
+@using CarRental.Data.Classes
+@using CarRental.Data.Interfaces
 
-<h1>Hello, world!</h1>
+<h1>Car Rental</h1>
 
-Welcome to your new app.
+<div class="row">
+    <div class="col-8">
+        <h5>Vehicles</h5>
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">RegNo</th>
+                    <th scope="col">Make</th>
+                    <th scope="col">Odometer</th>
+                    <th scope="col">Cost Km</th>
+                    <th scope="col">Vehicle Type</th>
+                    <th scope="col">$ Day</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var vehicle in Vehicles)
+                {
+                    <tr>
+                        <td>@vehicle.RegistrationNumber</td>
+                        <td>@vehicle.Make</td>
+                        <td>@vehicle.Odometer</td>
+                        <td>@vehicle.CostKm</td>
+                        <td>@vehicle.Type</td>
+                        <td>@vehicle.CostDay</td>
+                        @if (vehicle.Status == VehicleStatuses.Available)
+                        {
+                            <td><p class="badge badge-success">Available</p></td>
+                        }
+                        else
+                        {
+                            <td><p class="badge badge-danger">Booked</p></td>
+                        }
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<br />
+
+<div class="row">
+    <div class="col-8">
+        <h5>Bookings</h5>
+        <table class="table">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">RegNo</th>
+                    <th scope="col">Customer</th>
+                    <th scope="col">Km Rented</th>
+                    <th scope="col">Km Returned</th>
+                    <th scope="col">Rented</th>
+                    <th scope="col">Returned</th>
+                    <th scope="col">Cost</th>
+                    <th scope="col">Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var booking in Bookings)
+                {
+                    <tr>
+                        <td>@booking.RegistrationNumber</td>
+                        <td>@booking.Person.LastName, @booking.Person.FirstName (@booking.Person.SocialSecurityNumber)</td>
+                        <td>@booking.OdometerRented</td>
+                        <td>
+                            @if (!double.IsNaN(booking.OdometerReturned))
+                            {
+                                @booking.OdometerReturned
+                            }
+                        </td>
+                        <td>@booking.Rented.ToShortDateString()</td>
+                        <td>
+                            @if (booking.Returned != default)
+                            {
+                                @booking.Returned.ToShortDateString()
+                            }
+                        </td>
+                        <td>
+                            @if (!double.IsNaN(booking.Cost))
+                            {
+                                @booking.Cost
+                            }
+                        </td>
+                        <td>
+                            @if (booking.Returned != default)
+                            {
+                                <p class="badge badge-success">Closed</p>
+                            }
+                            else
+                            {
+                                <p class="badge badge-danger">Open</p>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+<br />
+
+<div class="row">
+    <div class="col-3">
+        <h5>Customers</h5>
+        <table class="table table-hover">
+            <thead class="thead-dark">
+                <tr>
+                    <th scope="col">SSN</th>
+                    <th scope="col">Last Name</th>
+                    <th scope="col">First Name</th>
+                    <th scope="col"></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var customer in Customers)
+                {
+                    <tr>
+                        <td>@customer.SocialSecurityNumber</td>
+                        <td>@customer.LastName</td>
+                        <td>@customer.FirstName</td>
+                        <td></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+
+</div>
+
+@code
+{
+    BookingProcessor bp = new BookingProcessor();
+    IEnumerable<IVehicle> vehicles;
+    IEnumerable<Customer> customers;
+    IEnumerable<IBooking> bookings;
+
+    int selectedCustomerId = default;
+    string distance = string.Empty;
+    string error = string.Empty;
+    string firstName = string.Empty;
+    string lastName = string.Empty;
+    string social = string.Empty;
+    string make = string.Empty;
+    string registrationNumber = string.Empty;
+    string odometer = string.Empty;
+    string costKm = string.Empty;
+    string selectedVehicleType = default;
+
+    IEnumerable<IVehicle> Vehicles => vehicles;
+    IEnumerable<Customer> Customers => customers;
+    IEnumerable<IBooking> Bookings => bookings;
+
+    public void GetVehicles()
+    {
+        try
+        {
+            vehicles = bp.GetVehicles();
+        }
+        catch
+        {
+
+            throw;
+        }
+    }
+
+    public void GetCustomers()
+    {
+        try
+        {
+            customers = bp.GetCustomers();
+        }
+        catch
+        {
+
+            throw;
+        }
+    }
+
+    public void GetBookings()
+    {
+        try
+        {
+            bookings = bp.GetBookings();
+        }
+        catch
+        {
+
+            throw;
+        }
+    }
+
+    protected override void OnInitialized()
+    {
+        GetVehicles();
+        GetCustomers();
+        GetBookings();
+    }
+}
