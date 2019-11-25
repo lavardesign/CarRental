@@ -6,10 +6,6 @@ using System.Linq;
 using CarRental.Data.Classes;
 using CarRental.Data.Interfaces;
 using CarRental.Common.Enums;
-using CarRental.Common.Classes;
-using CarRental.Common.Extensions;
-using CarRental.Common.Interfaces;
-using CarRental.Business.Classes;
 
 namespace CarRental.Tests
 {
@@ -88,16 +84,6 @@ namespace CarRental.Tests
             var vehicle2 = data.GetVehicle(vehicle1.Id);
             Assert.NotNull(vehicle2);
             Assert.Same(vehicle1, vehicle2);
-        }
-
-        [Fact]
-        public void CanGetBookingSingle()
-        {
-            IData data = new CollectionData();
-            var booking = data.GetBooking(1);
-
-            Assert.NotNull(booking);
-            Assert.Equal(0, booking.Id);
         }
 
         [Fact]
